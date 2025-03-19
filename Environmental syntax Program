@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LINE_LENGTH 256
+
+// Function to check if a string is a valid number (integer or float)
+int is_valid_number(const char *str) {
+    int dot_count = 0;
+    if (*str == '-' || *str == '+') str++;
+    if (!isdigit(*str) && *str != '.') return 0;
+    while (*str) {
+        if (*str == '.') {
+            dot_count++;
+            if (dot_count > 1) return 0;
+        } else if (!isdigit(*str)) {
+            return 0;
+        }
+        str++;
+    }
+    return 1;
+}
+
+// Function to check if a line follows the expected format: "Parameter: Value"
+int validate_line_format(const char *line) {
+    char param[50], value[50];
+    if (sscanf(line, "%49[^:]: %49s", param, value) == 2) {
+        return is_valid_number(value);
+    }
+    return 0;
+}
+
+// Function to check the syntax of environmental data input
+void syntax_check() {
+    printf("Enter environmental data in 'Parameter: Value' format (type 'END' to finish):\n");
+    char line[MAX_LINE_LENGTH];
+    int line_number = 0;
+    int valid = 1;
+    
+    while (1) {
+        fgets(line, sizeof(line), stdin);
+        line[strcspn(line, "\n")] = 0; // Remove newline character
+        if (strcmp(line, "END") == 0) break;
+        
+        line_number++;
+        if (!validate_line_format(line)) {
+            printf("Syntax Error at line %d: %s\n", line_number, line);
+            valid = 0;
+        }
+    }
+    
+    if (valid) {
+        printf("Environmental data is syntactically correct.\n");
+    }
+}
+
+int main() {
+    syntax_check();
+    return 0;
+}
